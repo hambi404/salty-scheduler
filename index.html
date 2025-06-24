@@ -30,8 +30,8 @@
         <label for="termin" class="block mb-1">Raid-Termin wählen:</label>
         <select id="termin" class="w-full px-3 py-2 rounded text-black" required>
           <option value="">-- Termin auswählen --</option>
-          <option value="Mittwoch 20:00 Uhr">Mittwoch 20:00 Uhr</option>
-          <option value="Sonntag 20:00 Uhr">Sonntag 20:00 Uhr</option>
+          <option value="Mittwoch 19:00 Uhr">Mittwoch 19:00 Uhr</option>
+          <option value="Sonntag 19:00 Uhr">Sonntag 19:00 Uhr</option>
         </select>
       </div>
 
@@ -41,31 +41,68 @@
       </div>
 
       <button type="submit" class="bg-yellow-400 hover:bg-yellow-300 text-black px-4 py-2 rounded font-bold">Eintragen</button>
+      <button type="button" id="resetButton" class="ml-2 bg-red-500 hover:bg-red-400 text-white px-4 py-2 rounded font-bold">Reset</button>
     </form>
 
     <div class="mt-8">
-      <h2 class="text-xl font-semibold mb-2">Aktuelle Anmeldungen</h2>
-      <ul id="anmeldungen" class="space-y-2"></ul>
+      <h2 class="text-xl font-semibold mb-2">Raidtrupp Eins</h2>
+      <ul id="raidgruppe1" class="space-y-2 mb-6"></ul>
+
+      <div id="raidgruppe2Block" class="hidden">
+        <h2 class="text-xl font-semibold mb-2">Raidtrupp Zwei</h2>
+        <ul id="raidgruppe2" class="space-y-2"></ul>
+      </div>
     </div>
   </main>
 
   <script>
     const form = document.getElementById('raidForm');
-    const list = document.getElementById('anmeldungen');
+    const resetButton = document.getElementById('resetButton');
+    const groupOneList = document.getElementById('raidgruppe1');
+    const groupTwoList = document.getElementById('raidgruppe2');
+    const groupTwoBlock = document.getElementById('raidgruppe2Block');
+
+    // Load entries from localStorage
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedEntries = JSON.parse(localStorage.getItem('raidAnmeldungen') || '[]');
+      savedEntries.forEach(entry => appendEntry(entry));
+    });
 
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       const player = document.getElementById('player').value;
-      const termin = document.getElementById('termin').value;
-      const kommentar = document.getElementById('kommentar').value;
+      const slot = document.getElementById('termin').value;
+      const comment = document.getElementById('kommentar').value;
 
-      const entry = `${player} - ${termin}${kommentar ? ` (${kommentar})` : ''}`;
+      const entry = `${player} - ${slot}${comment ? ` (${comment})` : ''}`;
 
-      const li = document.createElement('li');
-      li.textContent = entry;
-      list.appendChild(li);
+      const savedEntries = JSON.parse(localStorage.getItem('raidAnmeldungen') || '[]');
+      savedEntries.push(entry);
+      localStorage.setItem('raidAnmeldungen', JSON.stringify(savedEntries));
 
+      appendEntry(entry);
       form.reset();
+    });
+
+    function appendEntry(text) {
+      const li = document.createElement('li');
+      li.textContent = text;
+
+      if (groupOneList.children.length < 6) {
+        groupOneList.appendChild(li);
+      } else {
+        groupTwoBlock.classList.remove('hidden');
+        groupTwoList.appendChild(li);
+      }
+    }
+
+    resetButton.addEventListener('click', () => {
+      if (confirm('Alle Einträge wirklich löschen?')) {
+        localStorage.removeItem('raidAnmeldungen');
+        groupOneList.innerHTML = '';
+        groupTwoList.innerHTML = '';
+        groupTwoBlock.classList.add('hidden');
+      }
     });
   </script>
 </body>
