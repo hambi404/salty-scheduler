@@ -48,7 +48,7 @@
       <h2 class="text-xl font-semibold mb-2">Raidtrupp Mittwoch</h2>
       <ul id="gruppeMittwoch" class="space-y-2 mb-6"></ul>
 
-      <div id="gruppeSonntagBlock" class="hidden">
+      <div>
         <h2 class="text-xl font-semibold mb-2">Raidtrupp Sonntag</h2>
         <ul id="gruppeSonntag" class="space-y-2"></ul>
       </div>
@@ -60,57 +60,61 @@
     const resetButton = document.getElementById('resetButton');
     const gruppeMittwoch = document.getElementById('gruppeMittwoch');
     const gruppeSonntag = document.getElementById('gruppeSonntag');
-    const gruppeSonntagBlock = document.getElementById('gruppeSonntagBlock');
+    const API_URL = "https://script.google.com/macros/s/AKfycbxaX9Gk8GawBVg5RPJEusoXMHBOY5NZPdU6rtDaP4s6aWhFgrmP8EGhuy1UES_KlIEh/exec";
 
-    // Use localStorage key for global visibility
-    const STORAGE_KEY = 'saltyRaidEntries';
-
-    window.addEventListener('DOMContentLoaded', () => {
-      const savedEntries = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-      savedEntries.forEach(entry => appendEntry(entry));
-    });
-
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const player = document.getElementById('player').value;
       const slot = document.getElementById('termin').value;
       const comment = document.getElementById('kommentar').value;
 
-      const entry = {
-        player,
-        slot,
-        comment
-      };
+      const entry = { player, slot, comment };
 
-      const savedEntries = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-      savedEntries.push(entry);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(savedEntries));
-
-      appendEntry(entry);
-      form.reset();
+      try {
+        await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify(entry),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        form.reset();
+        loadEntries();
+      } catch (error) {
+        alert('Fehler beim Speichern!');
+      }
     });
 
-    function appendEntry(entry) {
-      const text = `${entry.player} - ${entry.slot}${entry.comment ? ` (${entry.comment})` : ''}`;
-      const li = document.createElement('li');
-      li.textContent = text;
+    async function loadEntries() {
+      gruppeMittwoch.innerHTML = '';
+      gruppeSonntag.innerHTML = '';
 
-      if (entry.slot.includes('Mittwoch')) {
-        gruppeMittwoch.appendChild(li);
-      } else if (entry.slot.includes('Sonntag')) {
-        gruppeSonntagBlock.classList.remove('hidden');
-        gruppeSonntag.appendChild(li);
+      try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+
+        const mittwochEntries = data.filter(e => e.slot.includes('Mittwoch'));
+        const sonntagEntries = data.filter(e => e.slot.includes('Sonntag'));
+
+        mittwochEntries.forEach(e => appendEntry(e, gruppeMittwoch));
+        sonntagEntries.forEach(e => appendEntry(e, gruppeSonntag));
+      } catch (error) {
+        alert('Fehler beim Laden der Einträge!');
       }
     }
 
+    function appendEntry(entry, listElement) {
+      const text = `${entry.player} - ${entry.slot}${entry.comment ? ` (${entry.comment})` : ''}`;
+      const li = document.createElement('li');
+      li.textContent = text;
+      listElement.appendChild(li);
+    }
+
     resetButton.addEventListener('click', () => {
-      if (confirm('Alle Einträge wirklich löschen?')) {
-        localStorage.removeItem(STORAGE_KEY);
-        gruppeMittwoch.innerHTML = '';
-        gruppeSonntag.innerHTML = '';
-        gruppeSonntagBlock.classList.add('hidden');
-      }
+      alert('Reset-Funktion muss manuell im Google Sheet erfolgen.');
     });
+
+    window.addEventListener('DOMContentLoaded', loadEntries);
   </script>
 </body>
 </html>
