@@ -45,12 +45,12 @@
     </form>
 
     <div class="mt-8">
-      <h2 class="text-xl font-semibold mb-2">Raidtrupp Eins</h2>
-      <ul id="raidgruppe1" class="space-y-2 mb-6"></ul>
+      <h2 class="text-xl font-semibold mb-2">Raidtrupp Mittwoch</h2>
+      <ul id="gruppeMittwoch" class="space-y-2 mb-6"></ul>
 
-      <div id="raidgruppe2Block" class="hidden">
-        <h2 class="text-xl font-semibold mb-2">Raidtrupp Zwei</h2>
-        <ul id="raidgruppe2" class="space-y-2"></ul>
+      <div id="gruppeSonntagBlock" class="hidden">
+        <h2 class="text-xl font-semibold mb-2">Raidtrupp Sonntag</h2>
+        <ul id="gruppeSonntag" class="space-y-2"></ul>
       </div>
     </div>
   </main>
@@ -58,13 +58,15 @@
   <script>
     const form = document.getElementById('raidForm');
     const resetButton = document.getElementById('resetButton');
-    const groupOneList = document.getElementById('raidgruppe1');
-    const groupTwoList = document.getElementById('raidgruppe2');
-    const groupTwoBlock = document.getElementById('raidgruppe2Block');
+    const gruppeMittwoch = document.getElementById('gruppeMittwoch');
+    const gruppeSonntag = document.getElementById('gruppeSonntag');
+    const gruppeSonntagBlock = document.getElementById('gruppeSonntagBlock');
 
-    // Load entries from localStorage
+    // Use localStorage key for global visibility
+    const STORAGE_KEY = 'saltyRaidEntries';
+
     window.addEventListener('DOMContentLoaded', () => {
-      const savedEntries = JSON.parse(localStorage.getItem('raidAnmeldungen') || '[]');
+      const savedEntries = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
       savedEntries.forEach(entry => appendEntry(entry));
     });
 
@@ -74,34 +76,39 @@
       const slot = document.getElementById('termin').value;
       const comment = document.getElementById('kommentar').value;
 
-      const entry = `${player} - ${slot}${comment ? ` (${comment})` : ''}`;
+      const entry = {
+        player,
+        slot,
+        comment
+      };
 
-      const savedEntries = JSON.parse(localStorage.getItem('raidAnmeldungen') || '[]');
+      const savedEntries = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
       savedEntries.push(entry);
-      localStorage.setItem('raidAnmeldungen', JSON.stringify(savedEntries));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(savedEntries));
 
       appendEntry(entry);
       form.reset();
     });
 
-    function appendEntry(text) {
+    function appendEntry(entry) {
+      const text = `${entry.player} - ${entry.slot}${entry.comment ? ` (${entry.comment})` : ''}`;
       const li = document.createElement('li');
       li.textContent = text;
 
-      if (groupOneList.children.length < 6) {
-        groupOneList.appendChild(li);
-      } else {
-        groupTwoBlock.classList.remove('hidden');
-        groupTwoList.appendChild(li);
+      if (entry.slot.includes('Mittwoch')) {
+        gruppeMittwoch.appendChild(li);
+      } else if (entry.slot.includes('Sonntag')) {
+        gruppeSonntagBlock.classList.remove('hidden');
+        gruppeSonntag.appendChild(li);
       }
     }
 
     resetButton.addEventListener('click', () => {
       if (confirm('Alle Einträge wirklich löschen?')) {
-        localStorage.removeItem('raidAnmeldungen');
-        groupOneList.innerHTML = '';
-        groupTwoList.innerHTML = '';
-        groupTwoBlock.classList.add('hidden');
+        localStorage.removeItem(STORAGE_KEY);
+        gruppeMittwoch.innerHTML = '';
+        gruppeSonntag.innerHTML = '';
+        gruppeSonntagBlock.classList.add('hidden');
       }
     });
   </script>
