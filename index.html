@@ -35,8 +35,15 @@
         <input type="text" id="comment" class="w-full px-3 py-2 rounded text-black" placeholder="z. B. Sonntag ab 20 Uhr, Mittwoch bevorzugt" />
       </div>
 
-      <button type="submit" class="bg-yellow-400 hover:bg-yellow-300 text-black px-4 py-2 rounded font-bold">Eintragen</button>
-      <button type="button" id="resetButton" class="ml-2 bg-red-500 hover:bg-red-400 text-white px-4 py-2 rounded font-bold">Reset</button>
+      <div>
+        <input type="checkbox" id="mentor" name="mentor" class="mr-2" />
+        <label for="mentor">Ich will anderen Inhalte zeigen / erklären 🙌</label>
+      </div>
+
+      <div class="flex space-x-4">
+        <button type="submit" class="bg-yellow-400 hover:bg-yellow-300 text-black px-4 py-2 rounded font-bold">Eintragen</button>
+        <button type="button" id="resetButton" class="bg-red-500 hover:bg-red-400 text-white px-4 py-2 rounded font-bold">Reset</button>
+      </div>
     </form>
 
     <div class="mt-8">
@@ -62,6 +69,7 @@
       const comment = document.getElementById('comment').value;
       const raid = document.getElementById('raid').checked;
       const dungeon = document.getElementById('dungeon').checked;
+      const mentor = document.getElementById('mentor').checked;
 
       if (!raid && !dungeon) {
         alert('Bitte mindestens Raid oder Dungeon auswählen!');
@@ -69,8 +77,8 @@
       }
 
       const entries = [];
-      if (raid) entries.push({ player, slot: "Raid", comment });
-      if (dungeon) entries.push({ player, slot: "Dungeon", comment });
+      if (raid) entries.push({ player, slot: "Raid", comment, mentor });
+      if (dungeon) entries.push({ player, slot: "Dungeon", comment, mentor });
 
       try {
         for (let entry of entries) {
@@ -102,7 +110,10 @@
       gruppeDungeon.innerHTML = '';
 
       data.forEach(entry => {
-        const text = `${entry.player}${entry.comment ? ` (${entry.comment})` : ''}`;
+        let text = `${entry.player}`;
+        if (entry.comment) text += ` (${entry.comment})`;
+        if (entry.mentor === true || entry.mentor === "true") text += ` 💡 Hilft gerne`;
+
         const li = document.createElement('li');
         li.textContent = text;
 
@@ -115,7 +126,7 @@
     }
 
     resetButton.addEventListener('click', () => {
-      alert('Reset-Funktion muss manuell im Google Sheet erfolgen.');
+      alert('Reset erfolgt aktuell über Felix.');
     });
 
     window.addEventListener('DOMContentLoaded', loadEntries);
