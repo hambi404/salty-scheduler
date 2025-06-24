@@ -3,41 +3,36 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Salty Originalz Raidplaner</title>
+  <title>Salty Originalz - Geführte Runs</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-900 text-white min-h-screen flex flex-col items-center py-10">
   <header class="mb-8 text-center">
-    <h1 class="text-4xl font-bold text-yellow-400">Salty Originalz - Raidplaner</h1>
-    <p class="mt-2 text-gray-300">Trag dich für den nächsten Raid ein!</p>
+    <h1 class="text-4xl font-bold text-yellow-400">Salty Originalz – Geführte Runs</h1>
+    <p class="mt-2 text-gray-300">Trag dich für Raid oder Dungeon ein!</p>
   </header>
 
   <main class="w-full max-w-xl bg-gray-800 p-6 rounded-2xl shadow-lg">
-    <form id="raidForm" class="space-y-4">
+    <form id="runForm" class="space-y-4">
       <div>
-        <label for="player" class="block mb-1">Wähle deinen Namen:</label>
-        <select id="player" class="w-full px-3 py-2 rounded text-black" required>
-          <option value="">-- bitte wählen --</option>
-          <option value="Zargon">Zargon</option>
-          <option value="Nerko">Nerko</option>
-          <option value="Lyricz">Lyricz</option>
-          <option value="SithLord">SithLord</option>
-          <option value="Nova">Nova</option>
-        </select>
+        <label for="player" class="block mb-1">Dein Name <span class="text-sm text-gray-400">(Ingame-Name)</span>:</label>
+        <input type="text" id="player" class="w-full px-3 py-2 rounded text-black" placeholder="z. B. Zargon123" required />
+      </div>
+
+      <div class="flex space-x-4">
+        <div>
+          <input type="checkbox" id="raid" name="type" value="Raid" class="mr-2">
+          <label for="raid">Raid</label>
+        </div>
+        <div>
+          <input type="checkbox" id="dungeon" name="type" value="Dungeon" class="mr-2">
+          <label for="dungeon">Dungeon</label>
+        </div>
       </div>
 
       <div>
-        <label for="termin" class="block mb-1">Raid-Termin wählen:</label>
-        <select id="termin" class="w-full px-3 py-2 rounded text-black" required>
-          <option value="">-- Termin auswählen --</option>
-          <option value="Mittwoch 19:00 Uhr">Mittwoch 19:00 Uhr</option>
-          <option value="Sonntag 19:00 Uhr">Sonntag 19:00 Uhr</option>
-        </select>
-      </div>
-
-      <div>
-        <label for="kommentar" class="block mb-1">Kommentar (optional):</label>
-        <input type="text" id="kommentar" class="w-full px-3 py-2 rounded text-black" placeholder="z. B. Erster Raid" />
+        <label for="comment" class="block mb-1">Kommentar <span class="text-sm text-gray-400">(optional – bevorzugte Zeit und Wochentag)</span>:</label>
+        <input type="text" id="comment" class="w-full px-3 py-2 rounded text-black" placeholder="z. B. Sonntag ab 20 Uhr, Mittwoch bevorzugt" />
       </div>
 
       <button type="submit" class="bg-yellow-400 hover:bg-yellow-300 text-black px-4 py-2 rounded font-bold">Eintragen</button>
@@ -45,40 +40,48 @@
     </form>
 
     <div class="mt-8">
-      <h2 class="text-xl font-semibold mb-2">Raidtrupp Mittwoch</h2>
-      <ul id="gruppeMittwoch" class="space-y-2 mb-6"></ul>
+      <h2 class="text-xl font-semibold mb-2">Raidgruppe</h2>
+      <ul id="gruppeRaid" class="space-y-2 mb-6"></ul>
 
-      <div>
-        <h2 class="text-xl font-semibold mb-2">Raidtrupp Sonntag</h2>
-        <ul id="gruppeSonntag" class="space-y-2"></ul>
-      </div>
+      <h2 class="text-xl font-semibold mb-2">Dungeon-Gruppe</h2>
+      <ul id="gruppeDungeon" class="space-y-2"></ul>
     </div>
   </main>
 
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbzwUcQz628oa0CJJh1q_mgJekOiogD5qJHOrEBs-oKgnVTjoONvQP5PgZEWT0WgOEZg/exec";
 
-    const form = document.getElementById('raidForm');
+    const form = document.getElementById('runForm');
     const resetButton = document.getElementById('resetButton');
-    const gruppeMittwoch = document.getElementById('gruppeMittwoch');
-    const gruppeSonntag = document.getElementById('gruppeSonntag');
+    const gruppeRaid = document.getElementById('gruppeRaid');
+    const gruppeDungeon = document.getElementById('gruppeDungeon');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const player = document.getElementById('player').value;
-      const slot = document.getElementById('termin').value;
-      const comment = document.getElementById('kommentar').value;
+      const comment = document.getElementById('comment').value;
+      const raid = document.getElementById('raid').checked;
+      const dungeon = document.getElementById('dungeon').checked;
 
-      const entry = { player, slot, comment };
+      if (!raid && !dungeon) {
+        alert('Bitte mindestens Raid oder Dungeon auswählen!');
+        return;
+      }
+
+      const entries = [];
+      if (raid) entries.push({ player, slot: "Raid", comment });
+      if (dungeon) entries.push({ player, slot: "Dungeon", comment });
 
       try {
-        await fetch(API_URL, {
-          method: 'POST',
-          body: JSON.stringify(entry),
-          headers: {
-            'Content-Type': 'text/plain;charset=utf-8' // wichtig für CORS-freies POST
-          }
-        });
+        for (let entry of entries) {
+          await fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify(entry),
+            headers: {
+              'Content-Type': 'text/plain;charset=utf-8'
+            }
+          });
+        }
         form.reset();
         loadEntries();
       } catch (error) {
@@ -87,9 +90,7 @@
     });
 
     function loadEntries() {
-      // Entferne vorherige JSONP-Skripte
       document.querySelectorAll('script[data-jsonp]').forEach(s => s.remove());
-
       const script = document.createElement('script');
       script.src = `${API_URL}?callback=handleEntries&_=${Date.now()}`;
       script.setAttribute('data-jsonp', '1');
@@ -97,18 +98,18 @@
     }
 
     function handleEntries(data) {
-      gruppeMittwoch.innerHTML = '';
-      gruppeSonntag.innerHTML = '';
+      gruppeRaid.innerHTML = '';
+      gruppeDungeon.innerHTML = '';
 
       data.forEach(entry => {
         const text = `${entry.player}${entry.comment ? ` (${entry.comment})` : ''}`;
         const li = document.createElement('li');
         li.textContent = text;
 
-        if (entry.slot.includes('Mittwoch')) {
-          gruppeMittwoch.appendChild(li);
-        } else if (entry.slot.includes('Sonntag')) {
-          gruppeSonntag.appendChild(li);
+        if (entry.slot === "Raid") {
+          gruppeRaid.appendChild(li);
+        } else if (entry.slot === "Dungeon") {
+          gruppeDungeon.appendChild(li);
         }
       });
     }
