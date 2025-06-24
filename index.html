@@ -3,130 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Salty Originalz - Geführte Runs</title><!DOCTYPE html>
-<html lang="de">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Salty Originalz - Geführte Runs</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-</head>
-<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center py-10">
-  <header class="mb-8 text-center">
-    <h1 class="text-4xl font-bold text-yellow-400">Salty Originalz - Geführte Runs</h1>
-    <p class="mt-2 text-gray-300">Trag dich ein – ob Raid oder Dungeon!</p>
-  </header>
-
-  <main class="w-full max-w-xl bg-gray-800 p-6 rounded-2xl shadow-lg">
-    <form id="raidForm" class="space-y-4">
-      <div>
-        <label for="player" class="block mb-1">Dein Name <span class="text-sm text-gray-400">(bitte Ingame-Namen verwenden)</span>:</label>
-        <input type="text" id="player" class="w-full px-3 py-2 rounded text-black" required />
-      </div>
-
-      <div class="flex space-x-4">
-        <div>
-          <input type="checkbox" id="isRaid" name="raid" />
-          <label for="isRaid">Raid</label>
-        </div>
-        <div>
-          <input type="checkbox" id="isDungeon" name="dungeon" />
-          <label for="isDungeon">Dungeon</label>
-        </div>
-      </div>
-
-      <div>
-        <label for="kommentar" class="block mb-1">Kommentar <span class="text-sm text-gray-400">(z. B. bevorzugter Tag oder Uhrzeit)</span>:</label>
-        <input type="text" id="kommentar" class="w-full px-3 py-2 rounded text-black" placeholder="z. B. Sonntagabend, nur donnerstags etc." />
-      </div>
-
-      <div>
-        <input type="checkbox" id="mentor" name="mentor" />
-        <label for="mentor">Ich will anderen helfen / erklären 🙌</label>
-      </div>
-
-      <button type="submit" class="bg-yellow-400 hover:bg-yellow-300 text-black px-4 py-2 rounded font-bold">Eintragen</button>
-    </form>
-
-    <div class="mt-8">
-      <h2 class="text-xl font-semibold mb-2">Geführte Raids</h2>
-      <ul id="gruppeRaid" class="space-y-2 mb-6"></ul>
-
-      <h2 class="text-xl font-semibold mb-2">Geführte Dungeons</h2>
-      <ul id="gruppeDungeon" class="space-y-2"></ul>
-    </div>
-  </main>
-
-  <script>
-    const form = document.getElementById('raidForm');
-    const gruppeRaid = document.getElementById('gruppeRaid');
-    const gruppeDungeon = document.getElementById('gruppeDungeon');
-    const API_URL = "https://script.google.com/macros/s/AKfycbzwUcQz628oa0CJJh1q_mgJekOiogD5qJHOrEBs-oKgnVTjoONvQP5PgZEWT0WgOEZg/exec";
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const player = document.getElementById('player').value;
-      const comment = document.getElementById('kommentar').value;
-      const isRaid = document.getElementById('isRaid').checked;
-      const isDungeon = document.getElementById('isDungeon').checked;
-      const mentor = document.getElementById('mentor').checked;
-
-      const entry = {
-        player,
-        comment,
-        raid: isRaid,
-        dungeon: isDungeon,
-        mentor
-      };
-
-      try {
-        await fetch(API_URL, {
-          method: 'POST',
-          body: JSON.stringify(entry),
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-        form.reset();
-        loadEntries();
-      } catch (error) {
-        alert('Fehler beim Speichern!');
-      }
-    });
-
-    async function loadEntries() {
-      gruppeRaid.innerHTML = '';
-      gruppeDungeon.innerHTML = '';
-
-      try {
-        const res = await fetch(API_URL);
-        const data = await res.json();
-
-        const raidEntries = data.filter(e => e.raid);
-        const dungeonEntries = data.filter(e => e.dungeon);
-
-        raidEntries.forEach(e => appendEntry(e, gruppeRaid));
-        dungeonEntries.forEach(e => appendEntry(e, gruppeDungeon));
-      } catch (error) {
-        alert('Fehler beim Laden der Einträge!');
-      }
-    }
-
-    function appendEntry(entry, listElement) {
-      let text = `${entry.player}`;
-      if (entry.comment) text += ` (${entry.comment})`;
-      if (entry.mentor) text += ` 💡 Hilft gerne!`;
-
-      const li = document.createElement('li');
-      li.textContent = text;
-      listElement.appendChild(li);
-    }
-
-    window.addEventListener('DOMContentLoaded', loadEntries);
-  </script>
-</body>
-</html>
-
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-900 text-white min-h-screen flex flex-col items-center py-10">
@@ -158,8 +35,12 @@
         <input type="text" id="comment" class="w-full px-3 py-2 rounded text-black" placeholder="z. B. Sonntag ab 20 Uhr, Mittwoch bevorzugt" />
       </div>
 
+      <div>
+        <input type="checkbox" id="mentor" name="mentor" class="mr-2" />
+        <label for="mentor">Ich bin bereit, anderen Inhalte zu zeigen / zu erklären 🙌</label>
+      </div>
+
       <button type="submit" class="bg-yellow-400 hover:bg-yellow-300 text-black px-4 py-2 rounded font-bold">Eintragen</button>
-      <button type="button" id="resetButton" class="ml-2 bg-red-500 hover:bg-red-400 text-white px-4 py-2 rounded font-bold">Reset</button>
     </form>
 
     <div class="mt-8">
@@ -175,7 +56,6 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbzwUcQz628oa0CJJh1q_mgJekOiogD5qJHOrEBs-oKgnVTjoONvQP5PgZEWT0WgOEZg/exec";
 
     const form = document.getElementById('runForm');
-    const resetButton = document.getElementById('resetButton');
     const gruppeRaid = document.getElementById('gruppeRaid');
     const gruppeDungeon = document.getElementById('gruppeDungeon');
 
@@ -185,6 +65,7 @@
       const comment = document.getElementById('comment').value;
       const raid = document.getElementById('raid').checked;
       const dungeon = document.getElementById('dungeon').checked;
+      const mentor = document.getElementById('mentor').checked;
 
       if (!raid && !dungeon) {
         alert('Bitte mindestens Raid oder Dungeon auswählen!');
@@ -192,8 +73,8 @@
       }
 
       const entries = [];
-      if (raid) entries.push({ player, slot: "Raid", comment });
-      if (dungeon) entries.push({ player, slot: "Dungeon", comment });
+      if (raid) entries.push({ player, slot: "Raid", comment, mentor });
+      if (dungeon) entries.push({ player, slot: "Dungeon", comment, mentor });
 
       try {
         for (let entry of entries) {
@@ -225,7 +106,10 @@
       gruppeDungeon.innerHTML = '';
 
       data.forEach(entry => {
-        const text = `${entry.player}${entry.comment ? ` (${entry.comment})` : ''}`;
+        let text = `${entry.player}`;
+        if (entry.comment) text += ` (${entry.comment})`;
+        if (entry.mentor === true || entry.mentor === "true") text += ` 💡 Hilft gerne`;
+
         const li = document.createElement('li');
         li.textContent = text;
 
@@ -236,10 +120,6 @@
         }
       });
     }
-
-    resetButton.addEventListener('click', () => {
-      alert('Reset-Funktion muss manuell im Google Sheet erfolgen.');
-    });
 
     window.addEventListener('DOMContentLoaded', loadEntries);
   </script>
