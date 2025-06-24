@@ -35,12 +35,8 @@
         <input type="text" id="comment" class="w-full px-3 py-2 rounded text-black" placeholder="z. B. Sonntag ab 20 Uhr, Mittwoch bevorzugt" />
       </div>
 
-      <div>
-        <input type="checkbox" id="mentor" name="mentor" class="mr-2" />
-        <label for="mentor">Ich bin bereit, anderen Inhalte zu zeigen / zu erklären 🙌</label>
-      </div>
-
       <button type="submit" class="bg-yellow-400 hover:bg-yellow-300 text-black px-4 py-2 rounded font-bold">Eintragen</button>
+      <button type="button" id="resetButton" class="ml-2 bg-red-500 hover:bg-red-400 text-white px-4 py-2 rounded font-bold">Reset</button>
     </form>
 
     <div class="mt-8">
@@ -56,6 +52,7 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbzwUcQz628oa0CJJh1q_mgJekOiogD5qJHOrEBs-oKgnVTjoONvQP5PgZEWT0WgOEZg/exec";
 
     const form = document.getElementById('runForm');
+    const resetButton = document.getElementById('resetButton');
     const gruppeRaid = document.getElementById('gruppeRaid');
     const gruppeDungeon = document.getElementById('gruppeDungeon');
 
@@ -65,7 +62,6 @@
       const comment = document.getElementById('comment').value;
       const raid = document.getElementById('raid').checked;
       const dungeon = document.getElementById('dungeon').checked;
-      const mentor = document.getElementById('mentor').checked;
 
       if (!raid && !dungeon) {
         alert('Bitte mindestens Raid oder Dungeon auswählen!');
@@ -73,8 +69,8 @@
       }
 
       const entries = [];
-      if (raid) entries.push({ player, slot: "Raid", comment, mentor });
-      if (dungeon) entries.push({ player, slot: "Dungeon", comment, mentor });
+      if (raid) entries.push({ player, slot: "Raid", comment });
+      if (dungeon) entries.push({ player, slot: "Dungeon", comment });
 
       try {
         for (let entry of entries) {
@@ -106,10 +102,7 @@
       gruppeDungeon.innerHTML = '';
 
       data.forEach(entry => {
-        let text = `${entry.player}`;
-        if (entry.comment) text += ` (${entry.comment})`;
-        if (entry.mentor === true || entry.mentor === "true") text += ` 💡 Hilft gerne`;
-
+        const text = `${entry.player}${entry.comment ? ` (${entry.comment})` : ''}`;
         const li = document.createElement('li');
         li.textContent = text;
 
@@ -120,6 +113,10 @@
         }
       });
     }
+
+    resetButton.addEventListener('click', () => {
+      alert('Reset-Funktion muss manuell im Google Sheet erfolgen.');
+    });
 
     window.addEventListener('DOMContentLoaded', loadEntries);
   </script>
