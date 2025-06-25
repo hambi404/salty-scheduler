@@ -37,7 +37,6 @@
 
       <div class="flex space-x-4">
         <button type="submit" class="bg-yellow-400 hover:bg-yellow-300 text-black px-4 py-2 rounded font-bold">Eintragen</button>
-        <button type="button" id="resetButton" class="bg-red-500 hover:bg-red-400 text-white px-4 py-2 rounded font-bold">Reset</button>
       </div>
     </form>
 
@@ -54,7 +53,6 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbzwUcQz628oa0CJJh1q_mgJekOiogD5qJHOrEBs-oKgnVTjoONvQP5PgZEWT0WgOEZg/exec";
 
     const form = document.getElementById('runForm');
-    const resetButton = document.getElementById('resetButton');
     const gruppeRaid = document.getElementById('gruppeRaid');
     const gruppeDungeon = document.getElementById('gruppeDungeon');
 
@@ -118,10 +116,6 @@
         }
       });
     }
-
-    resetButton.addEventListener('click', () => {
-      alert('Reset erfolgt aktuell über Felix. DM gerne an mich!');
-    });
 
     window.addEventListener('DOMContentLoaded', loadEntries);
   </script>
