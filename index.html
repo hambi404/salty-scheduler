@@ -112,10 +112,15 @@
       data.forEach(entry => {
         let text = `${entry.player}`;
         if (entry.comment) text += ` (${entry.comment})`;
-        if (entry.mentor === true || entry.mentor === "true") text += ` 💡 Hilft gerne`;
+        if (entry.mentor === true || entry.mentor === "true") text += ` möchte andern helfen 💛`;
 
         const li = document.createElement('li');
         li.textContent = text;
+
+        // HERVORHEBUNG: Mentor:innen visuell hervorheben
+        if (entry.mentor === true || entry.mentor === "true") {
+          li.classList.add('bg-green-700', 'text-white', 'px-3', 'py-1', 'rounded');
+        }
 
         if (entry.slot === "Raid") {
           gruppeRaid.appendChild(li);
