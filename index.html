@@ -2,9 +2,9 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Salty Originalz - Geführte Runs</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
 </head>
 <body class="bg-gray-900 text-white min-h-screen flex flex-col items-center py-10">
   <header class="mb-8 text-center">
@@ -21,11 +21,11 @@
 
       <div class="flex space-x-4">
         <div>
-          <input type="checkbox" id="raid" name="type" value="Raid" class="mr-2">
+          <input type="checkbox" id="raid" name="type" value="Raid" class="mr-2" />
           <label for="raid">Raid</label>
         </div>
         <div>
-          <input type="checkbox" id="dungeon" name="type" value="Dungeon" class="mr-2">
+          <input type="checkbox" id="dungeon" name="type" value="Dungeon" class="mr-2" />
           <label for="dungeon">Dungeon</label>
         </div>
       </div>
@@ -33,11 +33,6 @@
       <div>
         <label for="comment" class="block mb-1">Kommentar <span class="text-sm text-gray-400">(optional – bevorzugte Zeit und Wochentag)</span>:</label>
         <input type="text" id="comment" class="w-full px-3 py-2 rounded text-black" placeholder="z. B. Sonntag ab 20 Uhr, Mittwoch bevorzugt" />
-      </div>
-
-      <div>
-        <input type="checkbox" id="mentor" name="mentor" class="mr-2" />
-        <label for="mentor">Ich will anderen Inhalte zeigen / erklären 🙌</label>
       </div>
 
       <div class="flex space-x-4">
@@ -64,40 +59,40 @@
     const gruppeDungeon = document.getElementById('gruppeDungeon');
 
     form.addEventListener('submit', async (e) => {
-     e.preventDefault();
-   
-     const player = document.getElementById('player').value;
-     const comment = document.getElementById('comment').value;
-     const raid = document.getElementById('raid').checked;
-     const dungeon = document.getElementById('dungeon').checked;
-     const mentor = document.getElementById('mentor').checked ? "ja" : "nein"; // 👈 jetzt als Text
-   
-     if (!raid && !dungeon) {
-       alert('Bitte mindestens Raid oder Dungeon auswählen!');
-       return;
-     }
-   
-     const entries = [];
-     if (raid) entries.push({ player, slot: "Raid", comment, mentor });
-     if (dungeon) entries.push({ player, slot: "Dungeon", comment, mentor });
-   
-     try {
-       for (let entry of entries) {
-         await fetch(API_URL, {
-           method: 'POST',
-           headers: {
-             'Content-Type': 'application/json' // wichtig für zuverlässiges Parsen
-           },
-           body: JSON.stringify(entry)
-         });
-       }
-       form.reset();
-       loadEntries();
-     } catch (error) {
-       console.error('Fehler:', error);
-       alert('Fehler beim Speichern!');
-     }
-   });
+      e.preventDefault();
+
+      const player = document.getElementById('player').value.trim();
+      const comment = document.getElementById('comment').value.trim();
+      const raid = document.getElementById('raid').checked;
+      const dungeon = document.getElementById('dungeon').checked;
+
+      if (!raid && !dungeon) {
+        alert('Bitte mindestens Raid oder Dungeon auswählen!');
+        return;
+      }
+
+      const entries = [];
+      if (raid) entries.push({ player, slot: "Raid", comment });
+      if (dungeon) entries.push({ player, slot: "Dungeon", comment });
+
+      try {
+        for (const entry of entries) {
+          await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(entry)
+          });
+        }
+        form.reset();
+        loadEntries();
+      } catch (error) {
+        console.error('Fehler:', error);
+        alert('Fehler beim Speichern!');
+      }
+    });
+
     function loadEntries() {
       document.querySelectorAll('script[data-jsonp]').forEach(s => s.remove());
       const script = document.createElement('script');
@@ -109,21 +104,14 @@
     function handleEntries(data) {
       gruppeRaid.innerHTML = '';
       gruppeDungeon.innerHTML = '';
-    
+
       data.forEach(entry => {
-        let text = `${entry.player}`;
+        let text = entry.player;
         if (entry.comment) text += ` (${entry.comment})`;
-    
-        const isMentor = String(entry.mentor).toLowerCase() === "ja";
-        if (isMentor) text += ` möchte anderen helfen 💛`;
-    
+
         const li = document.createElement('li');
         li.textContent = text;
-    
-        if (isMentor) {
-          li.classList.add('bg-green-700', 'text-white', 'px-3', 'py-1', 'rounded');
-        }
-    
+
         if (entry.slot === "Raid") {
           gruppeRaid.appendChild(li);
         } else if (entry.slot === "Dungeon") {
