@@ -2,9 +2,9 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Salty Originalz - Geführte Runs</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-900 text-white min-h-screen flex flex-col items-center py-10">
   <header class="mb-8 text-center">
@@ -16,16 +16,16 @@
     <form id="runForm" class="space-y-4">
       <div>
         <label for="player" class="block mb-1">Dein Name <span class="text-sm text-gray-400">(Ingame-Name)</span>:</label>
-        <input type="text" id="player" class="w-full px-3 py-2 rounded text-black" placeholder="z. B. Ikora's bald head" required />
+        <input type="text" id="player" class="w-full px-3 py-2 rounded text-black" placeholder="z. B. Ikora's Bald Head" required />
       </div>
 
       <div class="flex space-x-4">
         <div>
-          <input type="checkbox" id="raid" name="type" value="Raid" class="mr-2" />
+          <input type="checkbox" id="raid" name="type" value="Raid" class="mr-2">
           <label for="raid">Raid</label>
         </div>
         <div>
-          <input type="checkbox" id="dungeon" name="type" value="Dungeon" class="mr-2" />
+          <input type="checkbox" id="dungeon" name="type" value="Dungeon" class="mr-2">
           <label for="dungeon">Dungeon</label>
         </div>
       </div>
@@ -33,6 +33,11 @@
       <div>
         <label for="comment" class="block mb-1">Kommentar <span class="text-sm text-gray-400">(optional – bevorzugte Zeit und Wochentag)</span>:</label>
         <input type="text" id="comment" class="w-full px-3 py-2 rounded text-black" placeholder="z. B. Sonntag ab 20 Uhr, Mittwoch bevorzugt" />
+      </div>
+
+      <div>
+        <input type="checkbox" id="mentor" name="mentor" class="mr-2" />
+        <label for="mentor">Ich will anderen Inhalte zeigen / erklären 🙌</label>
       </div>
 
       <div class="flex space-x-4">
@@ -60,11 +65,11 @@
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-
-      const player = document.getElementById('player').value.trim();
-      const comment = document.getElementById('comment').value.trim();
+      const player = document.getElementById('player').value;
+      const comment = document.getElementById('comment').value;
       const raid = document.getElementById('raid').checked;
       const dungeon = document.getElementById('dungeon').checked;
+      const mentor = document.getElementById('mentor').checked;
 
       if (!raid && !dungeon) {
         alert('Bitte mindestens Raid oder Dungeon auswählen!');
@@ -72,23 +77,22 @@
       }
 
       const entries = [];
-      if (raid) entries.push({ player, slot: "Raid", comment });
-      if (dungeon) entries.push({ player, slot: "Dungeon", comment });
+      if (raid) entries.push({ player, slot: "Raid", comment, mentor });
+      if (dungeon) entries.push({ player, slot: "Dungeon", comment, mentor });
 
       try {
-        for (const entry of entries) {
+        for (let entry of entries) {
           await fetch(API_URL, {
             method: 'POST',
+            body: JSON.stringify(entry),
             headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(entry)
+              'Content-Type': 'text/plain;charset=utf-8'
+            }
           });
         }
         form.reset();
         loadEntries();
       } catch (error) {
-        console.error('Fehler:', error);
         alert('Fehler beim Speichern!');
       }
     });
@@ -106,11 +110,17 @@
       gruppeDungeon.innerHTML = '';
 
       data.forEach(entry => {
-        let text = entry.player;
+        let text = `${entry.player}`;
         if (entry.comment) text += ` (${entry.comment})`;
+        if (entry.mentor === true || entry.mentor === "true") text += ` möchte andern helfen 💛`;
 
         const li = document.createElement('li');
         li.textContent = text;
+
+        // HERVORHEBUNG: Mentor:innen visuell hervorheben
+        if (entry.mentor === true || entry.mentor === "true") {
+          li.classList.add('bg-green-700', 'text-white', 'px-3', 'py-1', 'rounded');
+        }
 
         if (entry.slot === "Raid") {
           gruppeRaid.appendChild(li);
@@ -121,7 +131,7 @@
     }
 
     resetButton.addEventListener('click', () => {
-      alert('Reset erfolgt aktuell über Felix. Gerne per DM an mich! ^^');
+      alert('Reset erfolgt aktuell über Felix.');
     });
 
     window.addEventListener('DOMContentLoaded', loadEntries);
